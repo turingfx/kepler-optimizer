@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kepler Optimizer - 智能诊断与优化系统</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .section {
+            margin-bottom: 40px;
+        }
+
+        .section h2 {
+            color: #667eea;
+            font-size: 1.8em;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid #667eea;
+        }
+
+        .section h3 {
+            color: #764ba2;
+            font-size: 1.4em;
+            margin: 25px 0 15px;
+        }
+
+        .flowchart {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 30px;
+            margin: 20px 0;
+        }
+
+        .flow-step {
+            display: flex;
+            align-items: center;
+            margin: 15px 0;
+            padding: 15px;
+            background: white;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .flow-step.decision {
+            border-left-color: #f39c12;
+            background: #fffbf0;
+        }
+
+        .flow-step.action {
+            border-left-color: #27ae60;
+            background: #f0fff4;
+        }
+
+        .flow-step.warning {
+            border-left-color: #e74c3c;
+            background: #fff5f5;
+        }
+
+        .step-number {
+            width: 40px;
+            height: 40px;
+            background: #667eea;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-right: 15px;
+            flex-shrink: 0;
+        }
+
+        .flow-step.decision .step-number {
+            background: #f39c12;
+        }
+
+        .flow-step.action .step-number {
+            background: #27ae60;
+        }
+
+        .flow-step.warning .step-number {
+            background: #e74c3c;
+        }
+
+        .step-content {
+            flex: 1;
+        }
+
+        .step-title {
+            font-weight: bold;
+            font-size: 1.1em;
+            margin-bottom: 5px;
+        }
+
+        .step-desc {
+            color: #666;
+            font-size: 0.95em;
+        }
+
+        .arrow {
+            text-align: center;
+            font-size: 24px;
+            color: #667eea;
+            margin: 10px 0;
+        }
+
+        .component-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .component-card {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 25px;
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .component-card:hover {
+            border-color: #667eea;
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.2);
+        }
+
+        .component-card h4 {
+            color: #667eea;
+            font-size: 1.3em;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+        }
+
+        .component-card h4 .icon {
+            margin-right: 10px;
+            font-size: 1.2em;
+        }
+
+        .component-card p {
+            color: #666;
+            margin-bottom: 15px;
+        }
+
+        .component-card ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .component-card li {
+            padding: 8px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .component-card li:last-child {
+            border-bottom: none;
+        }
+
+        .component-card li:before {
+            content: "✓";
+            color: #27ae60;
+            margin-right: 10px;
+            font-weight: bold;
+        }
+
+        .dependency-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: 500;
+            margin-top: 10px;
+        }
+
+        .dependency-badge.required {
+            background: #fee;
+            color: #c33;
+        }
+
+        .dependency-badge.optional {
+            background: #efe;
+            color: #3c3;
+        }
+
+        .code-block {
+            background: #2d3748;
+            color: #e2e8f0;
+            padding: 20px;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 15px 0;
+        }
+
+        .code-block code {
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 0.9em;
+            line-height: 1.5;
+        }
+
+        .highlight {
+            background: linear-gradient(120deg, #a8edea 0%, #fed6e3 100%);
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-weight: 500;
+        }
+
+        .golden-rule {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            border-radius: 12px;
+            padding: 25px;
+            margin: 20px 0;
+        }
+
+        .golden-rule h4 {
+            color: #764ba2;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+        }
+
+        .golden-rule ol {
+            padding-left: 20px;
+        }
+
+        .golden-rule li {
+            margin: 10px 0;
+            padding-left: 10px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background: #667eea;
+            color: white;
+        }
+
+        tr:hover {
+            background: #f5f5f5;
+        }
+
+        .footer {
+            background: #2d3748;
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .footer a {
+            color: #667eea;
+            text-decoration: none;
+        }
+
+        .footer a:hover {
+            text-decoration: underline;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 1.8em;
+            }
+            .content {
+                padding: 20px;
+            }
+            .component-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔧 Kepler Optimizer</h1>
+            <p>智能诊断与优化系统 - 自动化 Kepler 流计算任务调参</p>
+        </div>
+
+        <div class="content">
+            <!-- 流程图部分 -->
+            <div class="section">
+                <h2>📊 诊断流程图</h2>
+                <div class="flowchart">
+                    <div class="flow-step">
+                        <div class="step-number">1</div>
+                        <div class="step-content">
+                            <div class="step-title">Global View 指标采集</div>
+                            <div class="step-desc">获取任务监控指标：JobOffset、FullGc、write_records<br>依赖：<span class="highlight">call-webapi skill</span></div>
+                        </div>
+                    </div>
+                    <div class="arrow">⬇</div>
+                    <div class="flow-step">
+                        <div class="step-number">2</div>
+                        <div class="step-content">
+                            <div class="step-title">获取任务配置</div>
+                            <div class="step-desc">查询 worker.size、parallelismConfig、partition 数量<br>依赖：<span class="highlight">call-webapi skill</span></div>
+                        </div>
+                    </div>
+                    <div class="arrow">⬇</div>
+                    <div class="flow-step decision">
+                        <div class="step-number">?</div>
+                        <div class="step-content">
+                            <div class="step-title">并发一致性检查</div>
+                            <div class="step-desc">检查：worker.size = parallelismConfig 所有值 = partition 数量？</div>
+                        </div>
+                    </div>
+                    <div class="arrow">⬇</div>
+                    <div class="flow-step action">
+                        <div class="step-number">A</div>
+                        <div class="step-content">
+                            <div class="step-title">Simply-Opt (无脑对齐)</div>
+                            <div class="step-desc">如果不一致 → 自动对齐所有并发参数到 partition 数<br>配置：内存 4GB、buffer 120、cpu slot 3<br>依赖：<span class="highlight">call-webapi skill</span></div>
+                        </div>
+                    </div>
+                    <div class="arrow">⬇</div>
+                    <div class="flow-step decision">
+                        <div class="step-number">?</div>
+                        <div class="step-content">
+                            <div class="step-title">指标健康检查</div>
+                            <div class="step-desc">检查：JobOffset 是否上涨？GC 是否过高？写入是否跌0？</div>
+                        </div>
+                    </div>
+                    <div class="arrow">⬇</div>
+                    <div class="flow-step action">
+                        <div class="step-number">B</div>
+                        <div class="step-content">
+                            <div class="step-title">Normal-Opt (智能诊断)</div>
+                            <div class="step-desc">如果一致但有问题 → 智能决策内存配置 (4/5/6GB)<br>根据 GC 严重程度和写入影响自动调整<br>依赖：<span class="highlight">call-webapi skill</span></div>
+                        </div>
+                    </div>
+                    <div class="arrow">⬇</div>
+                    <div class="flow-step warning">
+                        <div class="step-number">!</div>
+                        <div class="step-content">
+                            <div class="step-title">Expert-Opt (专家诊断)</div>
+                            <div class="step-desc">如果仍未解决 → 人工确认后执行<br>查询 antlogs 异常日志，识别具体错误类型<br>依赖：<span class="highlight">call-webapi skill + antlogs MCP</span></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 组件说明 -->
+            <div class="section">
+                <h2>🧩 组件详解</h2>
+                <div class="component-grid">
+                    <div class="component-card">
+                        <h4><span class="icon">🔍</span>dg.sh (诊断主控)</h4>
+                        <p>智能诊断入口脚本，自动决策执行哪种优化策略</p>
+                        <ul>
+                            <li>自动采集任务指标</li>
+                            <li>检查并发一致性</li>
+                            <li>决策优化路径</li>
+                            <li>支持 dry-run 模式</li>
+                        </ul>
+                        <span class="dependency-badge required">必需依赖: call-webapi</span>
+                    </div>
+
+                    <div class="component-card">
+                        <h4><span class="icon">⚡</span>simply-opt (无脑对齐)</h4>
+                        <p>标准一键优化，将所有并发参数对齐到 partition 数</p>
+                        <ul>
+                            <li>worker.size = partition</li>
+                            <li>parallelismConfig 全对齐</li>
+                            <li>内存固定 4GB</li>
+                            <li>buffer 固定 120</li>
+                        </ul>
+                        <span class="dependency-badge required">必需依赖: call-webapi</span>
+                    </div>
+
+                    <div class="component-card">
+                        <h4><span class="icon">🧠</span>normal-opt (智能诊断)</h4>
+                        <p>基于监控指标智能决策的调参方案</p>
+                        <ul>
+                            <li>分析 JobOffset/FullGc/Write</li>
+                            <li>智能内存决策 (4/5/6GB)</li>
+                            <li>GC 高 → 增加内存</li>
+                            <li>写入跌0 → 诊断内存不足</li>
+                        </ul>
+                        <span class="dependency-badge required">必需依赖: call-webapi</span>
+                    </div>
+
+                    <div class="component-card">
+                        <h4><span class="icon">🔬</span>expert-opt (专家诊断)</h4>
+                        <p>深度诊断，查询日志识别具体错误类型</p>
+                        <ul>
+                            <li>查询 antlogs 异常日志</li>
+                            <li>识别 NoSuchTable/OOM/ODPS 冲突</li>
+                            <li>针对性优化策略</li>
+                            <li>需人工确认执行</li>
+                        </ul>
+                        <span class="dependency-badge required">必需依赖: call-webapi</span>
+                        <span class="dependency-badge optional">可选依赖: antlogs MCP</span>
+                    </div>
+
+                    <div class="component-card">
+                        <h4><span class="icon">📈</span>global-view (健康检查)</h4>
+                        <p>批量任务健康检查，输出诊断结论</p>
+                        <ul>
+                            <li>查询三大指标</li>
+                            <li>判断延时趋势</li>
+                            <li>识别 GC 问题</li>
+                            <li>输出诊断结论</li>
+                        </ul>
+                        <span class="dependency-badge required">必需依赖: call-webapi</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 黄金法则 -->
+            <div class="section">
+                <h2>👑 黄金法则</h2>
+                <div class="golden-rule">
+                    <h4>所有优化必须遵守的规则：</h4>
+                    <ol>
+                        <li><strong>kepler.worker.size</strong> = <strong>parallelismConfig</strong> 所有算子 = <strong>Partition</strong> 数量（三者必须一致）</li>
+                        <li><strong>job.worker.thread.number</strong> = 1</li>
+                        <li><strong>内存范围</strong>：2GB ~ 6GB（2147483648 ~ 6442450944 bytes）</li>
+                        <li><strong>Buffer 范围</strong>：60 ~ 200</li>
+                        <li><strong>更新时 jarId 必须为 "588"</strong>（无论原始配置是什么）</li>
+                    </ol>
+                </div>
+            </div>
+
+            <!-- 使用说明 -->
+            <div class="section">
+                <h2>📖 使用说明</h2>
+
+                <h3>快速开始</h3>
+                <div class="code-block">
+                    <code># 诊断并自动优化
+./dg.sh 197182
+
+# 仅诊断，不执行优化
+./dg.sh 197182 -n
+
+# 强制模式，跳过确认
+./dg.sh 197182 -f
+
+# 分析最近2小时数据
+./dg.sh 197182 -d 120</code>
+                </div>
+
+                <h3>单独使用各组件</h3>
+                <div class="code-block">
+                    <code># 批量健康检查
+./kepler_global_view_final.sh "197182,197183,197184"
+
+# 标准一键优化
+./kepler_simply_opt_simple.sh 197182
+
+# 智能诊断优化
+./kepler_normal_opt.sh -t 197182
+
+# 专家诊断（需人工确认）
+./kepler_expert_opt.sh -t 197182</code>
+                </div>
+
+                <h3>依赖安装</h3>
+                <table>
+                    <tr>
+                        <th>依赖</th>
+                        <th>安装方式</th>
+                        <th>用途</th>
+                    </tr>
+                    <tr>
+                        <td>call-webapi skill</td>
+                        <td>Qoder 中执行 /find-skills call-webapi</td>
+                        <td>所有 API 调用</td>
+                    </tr>
+                    <tr>
+                        <td>jq</td>
+                        <td>brew install jq 或 apt-get install jq</td>
+                        <td>JSON 处理</td>
+                    </tr>
+                    <tr>
+                        <td>antlogs MCP</td>
+                        <td>homi 环境内置</td>
+                        <td>仅 expert-opt 需要</td>
+                    </tr>
+                </table>
+            </div>
+
+            <!-- 决策矩阵 -->
+            <div class="section">
+                <h2>🎯 决策矩阵</h2>
+                <table>
+                    <tr>
+                        <th>场景</th>
+                        <th>诊断结果</th>
+                        <th>推荐方案</th>
+                        <th>自动执行</th>
+                    </tr>
+                    <tr>
+                        <td>worker.size ≠ partition</td>
+                        <td>并发不一致</td>
+                        <td>Simply-Opt</td>
+                        <td>✅ 是</td>
+                    </tr>
+                    <tr>
+                        <td>parallelismConfig 不一致</td>
+                        <td>并发不一致</td>
+                        <td>Simply-Opt</td>
+                        <td>✅ 是</td>
+                    </tr>
+                    <tr>
+                        <td>JobOffset 上涨 + GC 正常</td>
+                        <td>参数过小</td>
+                        <td>Normal-Opt</td>
+                        <td>✅ 是</td>
+                    </tr>
+                    <tr>
+                        <td>GC 高 + 写入跌0</td>
+                        <td>内存不足</td>
+                        <td>Normal-Opt (6GB)</td>
+                        <td>✅ 是</td>
+                    </tr>
+                    <tr>
+                        <td>GC 正常 + 频繁跌0</td>
+                        <td>写入异常</td>
+                        <td>Expert-Opt</td>
+                        <td>❌ 需人工确认</td>
+                    </tr>
+                    <tr>
+                        <td>NoSuchTable 错误</td>
+                        <td>表已废弃</td>
+                        <td>停止任务</td>
+                        <td>❌ 需人工确认</td>
+                    </tr>
+                </table>
+            </div>
+
+            <!-- 文件结构 -->
+            <div class="section">
+                <h2>📁 文件结构</h2>
+                <div class="code-block">
+                    <code>kepler-optimizer/
+├── dg.sh                           # 诊断主控脚本 ⭐入口
+├── kepler_global_view_final.sh     # 批量健康检查
+├── kepler_simply_opt_simple.sh     # 标准一键优化
+├── kepler_normal_opt.sh            # 智能诊断优化
+├── kepler_expert_opt.sh            # 专家级诊断
+├── README.html                     # 说明文档 (本文件)
+└── cookie.txt                      # 已废弃 (使用 call-webapi)</code>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>Kepler Optimizer | 智能诊断与优化系统</p>
+            <p style="margin-top: 10px; opacity: 0.8;">基于 call-webapi skill | 黄金法则驱动</p>
+        </div>
+    </div>
+</body>
+</html>
