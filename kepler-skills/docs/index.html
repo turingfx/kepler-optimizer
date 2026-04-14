@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kepler Skills - Stream Task Operations</title>
+    <style>
+        :root {
+            --bg-hard: #1d2021;
+            --bg: #282828;
+            --bg-soft: #32302f;
+            --bg1: #3c3836;
+            --bg2: #504945;
+            --fg: #ebdbb2;
+            --fg0: #fbf1c7;
+            --fg2: #d5c4a1;
+            --fg3: #bdae93;
+            --fg4: #a89984;
+            --red: #fb4934;
+            --green: #b8bb26;
+            --yellow: #fabd2f;
+            --blue: #83a598;
+            --purple: #d3869b;
+            --aqua: #8ec07c;
+            --orange: #fe8019;
+            --gray: #928374;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'JetBrains Mono', 'Fira Code', 'SF Mono', Consolas, monospace;
+            background: var(--bg-hard);
+            color: var(--fg);
+            line-height: 1.6;
+            font-size: 14px;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+        
+        header {
+            text-align: center;
+            padding-bottom: 40px;
+            border-bottom: 1px solid var(--bg2);
+            margin-bottom: 40px;
+        }
+        
+        h1 {
+            font-size: 2.5em;
+            color: var(--fg0);
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+        
+        h1 span {
+            color: var(--orange);
+        }
+        
+        .tagline {
+            color: var(--fg3);
+            font-size: 1.1em;
+        }
+        
+        .tagline code {
+            background: var(--bg1);
+            padding: 2px 8px;
+            border-radius: 4px;
+            color: var(--aqua);
+        }
+        
+        h2 {
+            color: var(--yellow);
+            font-size: 1.4em;
+            margin: 40px 0 20px 0;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--bg2);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        h2::before {
+            content: '//';
+            color: var(--gray);
+        }
+        
+        h3 {
+            color: var(--blue);
+            margin: 24px 0 12px 0;
+            font-size: 1.1em;
+        }
+        
+        .capabilities {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 16px;
+            margin: 20px 0;
+        }
+        
+        .capability {
+            background: var(--bg);
+            border: 1px solid var(--bg2);
+            border-radius: 8px;
+            padding: 20px;
+            transition: border-color 0.2s, transform 0.2s;
+        }
+        
+        .capability:hover {
+            border-color: var(--orange);
+            transform: translateY(-2px);
+        }
+        
+        .capability h4 {
+            color: var(--fg0);
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .capability h4 .icon {
+            color: var(--orange);
+            font-size: 1.2em;
+        }
+        
+        .capability p {
+            color: var(--fg3);
+            font-size: 0.9em;
+        }
+        
+        .data-format {
+            background: var(--bg);
+            border: 1px solid var(--bg2);
+            border-radius: 8px;
+            overflow: hidden;
+            margin: 20px 0;
+        }
+        
+        .data-format-header {
+            background: var(--bg1);
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--bg2);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .data-format-header .dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+        }
+        
+        .data-format-header .dot.red { background: var(--red); }
+        .data-format-header .dot.yellow { background: var(--yellow); }
+        .data-format-header .dot.green { background: var(--green); }
+        
+        .data-format-header .title {
+            margin-left: 8px;
+            color: var(--fg3);
+            font-size: 0.85em;
+        }
+        
+        .data-format pre {
+            padding: 16px;
+            overflow-x: auto;
+            font-size: 0.85em;
+            line-height: 1.5;
+        }
+        
+        .data-format code {
+            font-family: inherit;
+        }
+        
+        .key { color: var(--blue); }
+        .string { color: var(--green); }
+        .number { color: var(--purple); }
+        .comment { color: var(--gray); font-style: italic; }
+        .label { color: var(--yellow); }
+        .value { color: var(--aqua); }
+        
+        .endpoint-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            font-size: 0.9em;
+        }
+        
+        .endpoint-table th,
+        .endpoint-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid var(--bg2);
+        }
+        
+        .endpoint-table th {
+            background: var(--bg1);
+            color: var(--yellow);
+            font-weight: 600;
+        }
+        
+        .endpoint-table td {
+            color: var(--fg2);
+        }
+        
+        .endpoint-table code {
+            background: var(--bg-soft);
+            padding: 2px 6px;
+            border-radius: 3px;
+            color: var(--aqua);
+            font-size: 0.9em;
+        }
+        
+        .method-get { color: var(--green); }
+        .method-post { color: var(--blue); }
+        
+        .status-badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.75em;
+            font-weight: 600;
+        }
+        
+        .status-active { background: var(--green); color: var(--bg-hard); }
+        .status-stop { background: var(--yellow); color: var(--bg-hard); }
+        .status-restarting { background: var(--blue); color: var(--bg-hard); }
+        
+        footer {
+            margin-top: 60px;
+            padding-top: 20px;
+            border-top: 1px solid var(--bg2);
+            text-align: center;
+            color: var(--fg4);
+            font-size: 0.85em;
+        }
+        
+        footer a {
+            color: var(--blue);
+            text-decoration: none;
+        }
+        
+        footer a:hover {
+            text-decoration: underline;
+        }
+        
+        .note {
+            background: var(--bg-soft);
+            border-left: 3px solid var(--orange);
+            padding: 12px 16px;
+            margin: 16px 0;
+            border-radius: 0 4px 4px 0;
+        }
+        
+        .note strong {
+            color: var(--orange);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1><span>kepler</span>-skills</h1>
+            <p class="tagline">Stream task operations toolkit for <code>Kepler</code> streaming engine</p>
+        </header>
+        
+        <h2>Capabilities</h2>
+        
+        <div class="capabilities">
+            <div class="capability">
+                <h4><span class="icon">▶</span> Query Task</h4>
+                <p>Inspect task SQL, configuration parameters, parallelism settings, partition info, and recent operations.</p>
+            </div>
+            <div class="capability">
+                <h4><span class="icon">⟳</span> Tune Task</h4>
+                <p>Auto-align worker size and parallelism with upstream partitions. Configure memory, buffer, CPU slots.</p>
+            </div>
+            <div class="capability">
+                <h4><span class="icon">⏻</span> Start / Stop / Restart</h4>
+                <p>Control task lifecycle with graceful restart (preserve state) or immediate stop.</p>
+            </div>
+            <div class="capability">
+                <h4><span class="icon">↺</span> Reset Task</h4>
+                <p>Clear task state and restart from specified offset timestamp.</p>
+            </div>
+            <div class="capability">
+                <h4><span class="icon">☰</span> Operation Logs</h4>
+                <p>View recent operations: who did what and when.</p>
+            </div>
+            <div class="capability">
+                <h4><span class="icon">⬡</span> Multi-Site Support</h4>
+                <p>Switch between Kepler deployments. Auth credentials isolated per-site.</p>
+            </div>
+        </div>
+        
+        <h2>Data Formats</h2>
+        
+        <h3>Query Task Output</h3>
+        <div class="data-format">
+            <div class="data-format-header">
+                <span class="dot red"></span>
+                <span class="dot yellow"></span>
+                <span class="dot green"></span>
+                <span class="title">task-info.json</span>
+            </div>
+            <pre><code><span class="label">【SQL Definition】</span>
+<span class="value">CREATE STREAM TABLE ...</span>
+
+<span class="label">【Configuration Parameters】</span>
+<span class="key">kepler.worker.size</span>         = <span class="number">72</span>
+<span class="key">kepler.worker.memory.size</span>  = <span class="number">4294967296</span> <span class="comment">(4GB)</span>
+<span class="key">job.worker.thread.number</span>   = <span class="number">1</span>
+<span class="key">kepler.output.odps.buffer.size</span> = <span class="number">120</span>
+<span class="key">worker.cpu.slot.num</span>        = <span class="number">3</span>
+
+<span class="label">【Parallelism Settings】</span>
+<span class="key">Project-1</span>      = <span class="number">72</span>
+<span class="key">TableScan-0</span>    = <span class="number">72</span>
+<span class="key">TableModify-2</span>  = <span class="number">72</span>
+
+<span class="label">【Partition Info】</span>
+<span class="key">upstream_partitions</span> = <span class="number">72</span>
+<span class="key">current_offset</span>      = <span class="string">"2026-04-14 11:00:00"</span>
+<span class="key">delay_diff</span>          = <span class="number">129</span> <span class="comment">🟢</span>
+
+<span class="label">【Recent Operations】</span>
+<span class="key">operator</span>   <span class="key">event</span>     <span class="key">time</span>
+<span class="value">sansi.xy</span>   RESTART    <span class="string">2026-04-14 11:04:25</span>
+<span class="value">moose</span>      START      <span class="string">2026-03-30 16:01:43</span></code></pre>
+        </div>
+        
+        <h3>Tune Task Output</h3>
+        <div class="data-format">
+            <div class="data-format-header">
+                <span class="dot red"></span>
+                <span class="dot yellow"></span>
+                <span class="dot green"></span>
+                <span class="title">tune-preview.json</span>
+            </div>
+            <pre><code><span class="label">【变更计划】</span>
+<span class="key">kepler.worker.size</span>         = <span class="number">72</span>  <span class="comment">// align with partitions</span>
+<span class="key">kepler.worker.memory.size</span>  = <span class="number">4GB</span>
+<span class="key">job.worker.thread.number</span>   = <span class="number">1</span>
+<span class="key">parallelismConfig</span> (all)   = <span class="number">72</span>
+
+<span class="label">【完整配置确认】</span>
+<span class="comment">// 用户确认后提交</span>
+<span class="key">commitMode</span>                 = <span class="string">"PEND"</span>
+<span class="key">kepler.worker.size</span>         = <span class="number">72</span>
+<span class="key">kepler.worker.memory.size</span>  = <span class="number">4294967296</span>
+<span class="key">job.worker.thread.number</span>   = <span class="number">1</span>
+<span class="key">kepler.output.odps.buffer.size</span> = <span class="number">120</span>
+<span class="key">worker.cpu.slot.num</span>        = <span class="number">3</span>
+<span class="comment">...</span></code></pre>
+        </div>
+        
+        <h3>Reset Task Output</h3>
+        <div class="data-format">
+            <div class="data-format-header">
+                <span class="dot red"></span>
+                <span class="dot yellow"></span>
+                <span class="dot green"></span>
+                <span class="title">reset-confirm.json</span>
+            </div>
+            <pre><code><span class="label">【重置确认】</span>
+<span class="key">task_name</span>       = <span class="string">"my_streaming_task"</span>
+<span class="key">current_status</span>  = <span class="string">"ACTIVE"</span>
+<span class="key">current_offset</span>  = <span class="string">"2026-04-14 11:00:00"</span>
+<span class="key">reset_to</span>        = <span class="string">"2026-04-14 13:34:23"</span>
+
+<span class="comment">// 用户确认后重置</span></code></pre>
+        </div>
+        
+        <h3>Operation Logs Output</h3>
+        <div class="data-format">
+            <div class="data-format-header">
+                <span class="dot red"></span>
+                <span class="dot yellow"></span>
+                <span class="dot green"></span>
+                <span class="title">operation-logs.json</span>
+            </div>
+            <pre><code><span class="label">【操作记录】</span> <span class="comment">// 过滤 UPDATE/AUTO_OPTIMIZE</span>
+┌──────────────┬────────────┬─────────────────────┐
+│ <span class="label">操作人</span>       │ <span class="label">事件</span>       │ <span class="label">时间</span>                │
+├──────────────┼────────────┼─────────────────────┤
+│ <span class="value">sansi.xy</span>     │ RESTART    │ <span class="string">2026-04-14 11:04:25</span> │
+│ <span class="value">qingmao.pl</span>   │ RESTART    │ <span class="string">2025-01-16 12:46:47</span> │
+│ <span class="value">moose</span>        │ START      │ <span class="string">2023-03-30 16:01:43</span> │
+└──────────────┴────────────┴─────────────────────┘</code></pre>
+        </div>
+        
+        <h2>API Endpoints</h2>
+        
+        <table class="endpoint-table">
+            <thead>
+                <tr>
+                    <th>Endpoint</th>
+                    <th>Method</th>
+                    <th>Description</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><code>/api/sql/{topologyId}</code></td>
+                    <td><span class="method-get">GET</span></td>
+                    <td>Query task SQL and config</td>
+                </tr>
+                <tr>
+                    <td><code>/api/topology/topology/offset/{id}</code></td>
+                    <td><span class="method-get">GET</span></td>
+                    <td>Query partition count and delay</td>
+                </tr>
+                <tr>
+                    <td><code>/api/oprLogs/list</code></td>
+                    <td><span class="method-get">GET</span></td>
+                    <td>Query operation history</td>
+                </tr>
+                <tr>
+                    <td><code>/api/job/simpleQuery</code></td>
+                    <td><span class="method-post">POST</span></td>
+                    <td>Query task status and offset</td>
+                </tr>
+                <tr>
+                    <td><code>/api/sql/update</code></td>
+                    <td><span class="method-post">POST</span></td>
+                    <td>Update task configuration</td>
+                </tr>
+                <tr>
+                    <td><code>/api/topology/{id}/ops/start</code></td>
+                    <td><span class="method-post">POST</span></td>
+                    <td>Start stopped task</td>
+                </tr>
+                <tr>
+                    <td><code>/api/topology/{id}/ops/restart</code></td>
+                    <td><span class="method-post">POST</span></td>
+                    <td>Restart running task</td>
+                </tr>
+                <tr>
+                    <td><code>/api/topology/{id}/ops/stop</code></td>
+                    <td><span class="method-post">POST</span></td>
+                    <td>Stop task</td>
+                </tr>
+                <tr>
+                    <td><code>/api/job/batchOpr</code></td>
+                    <td><span class="method-post">POST</span></td>
+                    <td>Reset task to specific offset</td>
+                </tr>
+            </tbody>
+        </table>
+        
+        <div class="note">
+            <strong>Authentication:</strong> AccessKey signature (MD5) or Cookie. Credentials stored per-site with 600 permissions.
+        </div>
+        
+        <h2>Task Status</h2>
+        
+        <p>
+            <span class="status-badge status-active">ACTIVE</span> Running and processing data
+            <span class="status-badge status-stop" style="margin-left: 16px;">STOP</span> Stopped, can be started or reset
+            <span class="status-badge status-restarting" style="margin-left: 16px;">RESTARTING</span> In transition
+        </p>
+        
+        <footer>
+            <p>Kepler Skills &middot; <a href="https://yuque.antfin.com/go/doc/535880343">Technical Documentation</a></p>
+        </footer>
+    </div>
+</body>
+</html>
