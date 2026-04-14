@@ -76,6 +76,23 @@
             color: var(--aqua);
         }
         
+        .intro {
+            background: var(--bg);
+            border: 1px solid var(--bg2);
+            border-radius: 8px;
+            padding: 24px;
+            margin: 30px 0;
+        }
+        
+        .intro p {
+            color: var(--fg2);
+            margin-bottom: 12px;
+        }
+        
+        .intro p:last-child {
+            margin-bottom: 0;
+        }
+        
         h2 {
             color: var(--yellow);
             font-size: 1.4em;
@@ -187,40 +204,43 @@
         .label { color: var(--yellow); }
         .value { color: var(--aqua); }
         
-        .endpoint-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin: 20px 0;
-            font-size: 0.9em;
+        .auth-section {
+            background: var(--bg);
+            border: 1px solid var(--bg2);
+            border-radius: 8px;
+            padding: 24px;
+            margin: 30px 0;
         }
         
-        .endpoint-table th,
-        .endpoint-table td {
-            padding: 12px;
-            text-align: left;
-            border-bottom: 1px solid var(--bg2);
-        }
-        
-        .endpoint-table th {
-            background: var(--bg1);
+        .auth-section h3 {
+            margin-top: 0;
             color: var(--yellow);
-            font-weight: 600;
         }
         
-        .endpoint-table td {
-            color: var(--fg2);
-        }
-        
-        .endpoint-table code {
+        .auth-method {
+            margin: 16px 0;
+            padding: 16px;
             background: var(--bg-soft);
+            border-radius: 6px;
+        }
+        
+        .auth-method h4 {
+            color: var(--fg0);
+            margin-bottom: 8px;
+        }
+        
+        .auth-method p {
+            color: var(--fg3);
+            font-size: 0.9em;
+            margin-bottom: 8px;
+        }
+        
+        .auth-method code {
+            background: var(--bg1);
             padding: 2px 6px;
             border-radius: 3px;
             color: var(--aqua);
-            font-size: 0.9em;
         }
-        
-        .method-get { color: var(--green); }
-        .method-post { color: var(--blue); }
         
         .status-badge {
             display: inline-block;
@@ -251,18 +271,6 @@
         footer a:hover {
             text-decoration: underline;
         }
-        
-        .note {
-            background: var(--bg-soft);
-            border-left: 3px solid var(--orange);
-            padding: 12px 16px;
-            margin: 16px 0;
-            border-radius: 0 4px 4px 0;
-        }
-        
-        .note strong {
-            color: var(--orange);
-        }
     </style>
 </head>
 <body>
@@ -271,6 +279,11 @@
             <h1><span>kepler</span>-skills</h1>
             <p class="tagline">Stream task operations toolkit for <code>Kepler</code> streaming engine</p>
         </header>
+        
+        <div class="intro">
+            <p>Kepler 是基于 JStorm 的实时流计算引擎，广泛应用于蚂蚁内部实时数据处理场景，包括实时风控、实时监控、实时特征计算等。</p>
+            <p>本工具集提供对 Kepler 流任务的完整运维能力，支持任务查询、调参优化、生命周期管理、位点重置等操作。同时兼容离线数仓 ODPS 数据源的接入配置。</p>
+        </div>
         
         <h2>Capabilities</h2>
         
@@ -397,67 +410,25 @@
 └──────────────┴────────────┴─────────────────────┘</code></pre>
         </div>
         
-        <h2>API Endpoints</h2>
+        <h2>Authentication</h2>
         
-        <table class="endpoint-table">
-            <thead>
-                <tr>
-                    <th>Endpoint</th>
-                    <th>Method</th>
-                    <th>Description</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td><code>/api/sql/{topologyId}</code></td>
-                    <td><span class="method-get">GET</span></td>
-                    <td>Query task SQL and config</td>
-                </tr>
-                <tr>
-                    <td><code>/api/topology/topology/offset/{id}</code></td>
-                    <td><span class="method-get">GET</span></td>
-                    <td>Query partition count and delay</td>
-                </tr>
-                <tr>
-                    <td><code>/api/oprLogs/list</code></td>
-                    <td><span class="method-get">GET</span></td>
-                    <td>Query operation history</td>
-                </tr>
-                <tr>
-                    <td><code>/api/job/simpleQuery</code></td>
-                    <td><span class="method-post">POST</span></td>
-                    <td>Query task status and offset</td>
-                </tr>
-                <tr>
-                    <td><code>/api/sql/update</code></td>
-                    <td><span class="method-post">POST</span></td>
-                    <td>Update task configuration</td>
-                </tr>
-                <tr>
-                    <td><code>/api/topology/{id}/ops/start</code></td>
-                    <td><span class="method-post">POST</span></td>
-                    <td>Start stopped task</td>
-                </tr>
-                <tr>
-                    <td><code>/api/topology/{id}/ops/restart</code></td>
-                    <td><span class="method-post">POST</span></td>
-                    <td>Restart running task</td>
-                </tr>
-                <tr>
-                    <td><code>/api/topology/{id}/ops/stop</code></td>
-                    <td><span class="method-post">POST</span></td>
-                    <td>Stop task</td>
-                </tr>
-                <tr>
-                    <td><code>/api/job/batchOpr</code></td>
-                    <td><span class="method-post">POST</span></td>
-                    <td>Reset task to specific offset</td>
-                </tr>
-            </tbody>
-        </table>
-        
-        <div class="note">
-            <strong>Authentication:</strong> AccessKey signature (MD5) or Cookie. Credentials stored per-site with 600 permissions.
+        <div class="auth-section">
+            <h3>鉴权方式</h3>
+            
+            <div class="auth-method">
+                <h4>AccessKey Signature (推荐)</h4>
+                <p>参数: <code>operator</code> + <code>bizCode</code> + <code>accessKey</code></p>
+                <p>签名算法: <code>digest = MD5(accessKey + timestamp)</code></p>
+            </div>
+            
+            <div class="auth-method">
+                <h4>Cookie Authentication</h4>
+                <p>参数: 浏览器 Cookie 字符串</p>
+            </div>
+            
+            <p style="margin-top: 16px; color: var(--fg3); font-size: 0.9em;">
+                鉴权信息按站点独立存储于 <code>~/.kepler_auth/site_&lt;num&gt;.env</code>，权限 600，敏感信息不会记录或显示。
+            </p>
         </div>
         
         <h2>Task Status</h2>
