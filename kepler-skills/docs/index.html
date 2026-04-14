@@ -280,11 +280,6 @@
             <p class="tagline">Stream task operations toolkit for <code>Kepler</code> streaming engine</p>
         </header>
         
-        <div class="intro">
-            <p>Kepler 是基于 JStorm 的实时流计算引擎，广泛应用于蚂蚁内部实时数据处理场景，包括实时风控、实时监控、实时特征计算等。</p>
-            <p>本工具集提供对 Kepler 流任务的完整运维能力，支持任务查询、调参优化、生命周期管理、位点重置等操作。同时兼容离线数仓 ODPS 数据源的接入配置。</p>
-        </div>
-        
         <h2>Capabilities</h2>
         
         <div class="capabilities">
@@ -408,27 +403,6 @@
 │ <span class="value">qingmao.pl</span>   │ RESTART    │ <span class="string">2025-01-16 12:46:47</span> │
 │ <span class="value">moose</span>        │ START      │ <span class="string">2023-03-30 16:01:43</span> │
 └──────────────┴────────────┴─────────────────────┘</code></pre>
-        </div>
-        
-        <h2>Authentication</h2>
-        
-        <div class="auth-section">
-            <h3>鉴权方式</h3>
-            
-            <div class="auth-method">
-                <h4>AccessKey Signature (推荐)</h4>
-                <p>参数: <code>operator</code> + <code>bizCode</code> + <code>accessKey</code></p>
-                <p>签名算法: <code>digest = MD5(accessKey + timestamp)</code></p>
-            </div>
-            
-            <div class="auth-method">
-                <h4>Cookie Authentication</h4>
-                <p>参数: 浏览器 Cookie 字符串</p>
-            </div>
-            
-            <p style="margin-top: 16px; color: var(--fg3); font-size: 0.9em;">
-                鉴权信息按站点独立存储于 <code>~/.kepler_auth/site_&lt;num&gt;.env</code>，权限 600，敏感信息不会记录或显示。
-            </p>
         </div>
         
         <h2>Task Status</h2>
